@@ -1,0 +1,44 @@
+import numpy as np
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+
+# 1. Training data: [North, East, South, West] vehicle counts
+X = np.array([
+    [10, 20, 5, 15],
+    [30, 5, 10, 5],
+    [5, 5, 25, 20],
+    [12, 12, 12, 12],
+    [25, 10, 5, 0]
+])
+
+# 2. Labels: which direction should get green light (one-hot encoded)
+y = np.array([
+    [0, 1, 0, 0],  # East
+    [1, 0, 0, 0],  # North
+    [0, 0, 1, 0],  # South
+    [0, 0, 0, 1],  # West (tie)
+    [0, 1, 0, 0],  # East
+])
+
+# 3. Create neural network model
+model = Sequential()
+model.add(Dense(16, input_dim=4, activation='relu'))  # Input layer
+model.add(Dense(8, activation='relu'))                # Hidden layer
+model.add(Dense(4, activation='softmax'))             # Output layer
+
+# 4. Compile the model
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+# 5. Train the model
+model.fit(X, y, epochs=100, verbose=0)
+
+# 6. Test the model with a new traffic input
+test_input = np.array([[15, 25, 5, 10]])  # You can change this
+prediction = model.predict(test_input)
+
+# 7. Show the result
+directions = ['North', 'East', 'South', 'West']
+predicted_direction = directions[np.argmax(prediction)]
+print("Green signal should go to:", predicted_direction)
+for dir, prob in zip(directions, prediction[0]):
+    print(f"{dir}: {prob:.2f}")
